@@ -1,0 +1,88 @@
+﻿# Top-level .gitignore for SomethingApp
+
+# Node / frontend
+node_modules/
+.pnpm-store/
+.vite/
+dist/
+build/
+.cache/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.local
+
+# Environment / secrets
+.env
+*.env
+.env.*
+.env.local
+.env.*.local
+.env.test
+.env.production
+.env.*.secret
+.envrc
+.env.bak
+
+# Dotnet / C#
+# Ignore build outputs for all projects
+**/bin/
+**/obj/
+*.db
+*.sqlite
+*.mdf
+*.ldf
+publish/
+*.nupkg
+project.lock.json
+
+# Rider / VS / IDE
+.vs/
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.DotSettings.user
+*.sln.docstates
+*.iml
+
+# Logs
+logs/
+*.log
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Package managers / lockfiles (optional - uncomment if you decide not to track them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Misc
+*.cache
+*.coverage
+coverage/
+*.tmp
+*.bak
+*.swp
+
+# Secret / local settings
+appsettings.Development.json
+local.settings.json
+secrets.json
+
+# Client specific
+/dist/
+/.parcel-cache/
+
+# Ensure IDE config we want kept remains (exceptions above)
+
+# End of file

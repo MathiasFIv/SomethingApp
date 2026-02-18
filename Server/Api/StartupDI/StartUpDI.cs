@@ -1,0 +1,98 @@
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Npgsql;
+using Repository.DbContext;
+using Repository.Repositories;
+using Repository.Repositories.Interfaces;
+using Service.Auth;
+using Service.Interfaces;
+using Service.Services;
+using Sieve.Services;
+using StateleSSE.AspNetCore;
+
+namespace Api.StartupDI;
+
+public static class StartUpDI
+{
+    public static IServiceCollection AddStartupServices(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        bool addDefaultDbContext = true,
+        Action<IServiceCollection>? configureOverrides = null
+    )
+    {
+
+        // Only require the connection string when we intend to register the default DbContext
+        if (addDefaultDbContext)
+        {
+            // Read connection string strictly from appsettings.json/appsettings.{Environment}.json
+            var conn = configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrWhiteSpace(conn))
+                throw new InvalidOperationException(
+                    "Connection string 'ConnectionStrings:DefaultConnection' was not found. Configure it in appsettings.json / appsettings.Development.json.");
+
+
+            try
+            {
+                var csb = new NpgsqlConnectionStringBuilder(conn);
+                var startupLogger = LoggerFactory.Create(lb => lb.AddConsole()).CreateLogger("Startup");
+                startupLogger.LogInformation(
+                    "Using PostgreSQL connection from appsettings: Host={Host};Port={Port};Database={Database};Username={Username};SslMode={SslMode}",
+                    csb.Host, csb.Port, csb.Database, csb.Username, csb.SslMode);
+            }
+            catch
+            {
+                // Ignore parsing issues; EF/Npgsql will surface a useful error.
+            }
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(conn, npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()));
+
+        }
+        
+        var jwtSection = configuration.GetSection("Jwt");
+        var jwtOptions = jwtSection.Get<JwtOptions>() ?? throw new InvalidOperationException("Missing Jwt configuration.");
+        if (string.IsNullOrWhiteSpace(jwtOptions.Secret))
+            throw new InvalidOperationException("Jwt:Secret must be configured (appsettings.Development.json or environment variables).");
+
+        var secretByteLength = Encoding.UTF8.GetByteCount(jwtOptions.Secret);
+        if (secretByteLength < 32)
+            throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes (256 bits).");
+
+        services.AddSingleton(jwtOptions);
+        services.AddSingleton<JwtTokenService>();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret))
+                };
+            });
+        
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<PasswordService>();
+        services.AddScoped<ISieveProcessor, SieveProcessor>();
+        services.AddControllers();
+        services.AddOpenApiDocument();
+        services.AddAuthorization();
+        services.AddInMemorySseBackplane();
+        services.AddEfRealtime();
+        
+
+        // Allow tests (or other callers) to override registrations, e.g., swap DbContext with a test container
+        configureOverrides?.Invoke(services);
+        
+        return services;
+    }
+}
