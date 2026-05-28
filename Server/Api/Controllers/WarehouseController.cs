@@ -16,9 +16,7 @@ public class WarehouseController : ControllerBase
         _warehouseService = warehouseService;
     }
 
-    // =========================
-    // CREATE
-    // =========================
+ 
     [HttpPost]
     public async Task<ActionResult<WarehouseDTOs.WarehouseDto>> Create(WarehouseDTOs.CreateWarehouseDto dto)
     {
@@ -26,9 +24,7 @@ public class WarehouseController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    // =========================
-    // READ ALL
-    // =========================
+  
     [HttpGet]
     public async Task<ActionResult<List<WarehouseDTOs.WarehouseDto>>> GetAll()
     {
@@ -36,9 +32,7 @@ public class WarehouseController : ControllerBase
         return Ok(result);
     }
 
-    // =========================
-    // READ ONE
-    // =========================
+  
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<WarehouseDTOs.WarehouseDto>> GetById(Guid id)
     {
@@ -50,9 +44,7 @@ public class WarehouseController : ControllerBase
         return Ok(result);
     }
 
-    // =========================
-    // UPDATE
-    // =========================
+ 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, WarehouseDTOs.UpdateWarehouseDto dto)
     {
@@ -64,9 +56,7 @@ public class WarehouseController : ControllerBase
         return NoContent();
     }
 
-    // =========================
-    // DELETE
-    // =========================
+ 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -78,9 +68,6 @@ public class WarehouseController : ControllerBase
         return NoContent();
     }
 
-    // =========================
-    // STOCK OPERATIONS
-    // =========================
 
     [HttpPost("{warehouseId:guid}/stock/add")]
     public async Task<IActionResult> AddStock(
