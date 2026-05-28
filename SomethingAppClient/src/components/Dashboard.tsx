@@ -23,30 +23,52 @@ export const Dashboard: React.FC = () => {
     });
 
     return (
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-base-300 pb-5">
-                <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">Inventory Management</h1>
-                    <p className="text-sm opacity-60">Esbjerg & Kolding Hubs</p>
+        <div style={{ minHeight: '100vh', width: '100vw', display: 'block' }} className="bg-base-300 text-base-content p-6 sm:p-10">
+            {/* Container forced to take up wide screen space */}
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }} className="bg-base-100 p-8 rounded-2xl shadow-xl border border-base-200 w-full space-y-8">
+
+                {/* Header Section */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }} className="border-b border-base-200 pb-6">
+                    <div>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: 900 }} className="tracking-tight text-primary">
+                            Lager Management System
+                        </h1>
+                        <p style={{ fontSize: '0.875rem' }} className="opacity-60 mt-1 font-medium">Global Hub Matrix: Esbjerg & Kolding</p>
+                    </div>
+                    <button
+                        onClick={() => { setSelectedProduct(null); setActiveModal('edit'); }}
+                        className="btn btn-primary btn-md font-bold px-6 shadow-md"
+                    >
+                        + Add Product
+                    </button>
                 </div>
-                <button onClick={() => { setSelectedProduct(null); setActiveModal('edit'); }} className="btn btn-primary">+ Add Product</button>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <input placeholder="Search products or categories..." value={search} onChange={e => setSearch(e.target.value)} className="input input-bordered w-full sm:max-w-xs" />
+                {/* Controls Bar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }} className="bg-base-200 p-4 rounded-xl">
+                    <input
+                        placeholder="Search products or categories..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        style={{ width: '100%', maxWidth: '350px' }}
+                        className="input input-bordered bg-base-100 input-md"
+                    />
 
-                <div className="join">
-                    <button className={`join-item btn ${filterWarehouse === 'all' ? 'btn-active btn-primary' : ''}`} onClick={() => setFilterWarehouse('all')}>All Hubs</button>
-                    <button className={`join-item btn ${filterWarehouse === 'esbjerg' ? 'btn-active btn-primary' : ''}`} onClick={() => setFilterWarehouse('esbjerg')}>Esbjerg</button>
-                    <button className={`join-item btn ${filterWarehouse === 'kolding' ? 'btn-active btn-primary' : ''}`} onClick={() => setFilterWarehouse('kolding')}>Kolding</button>
+                    <div className="join">
+                        <button className={`join-item btn btn-md ${filterWarehouse === 'all' ? 'btn-primary' : 'btn-ghost bg-base-100'}`} onClick={() => setFilterWarehouse('all')}>All Hubs</button>
+                        <button className={`join-item btn btn-md ${filterWarehouse === 'esbjerg' ? 'btn-primary' : 'btn-ghost bg-base-100'}`} onClick={() => setFilterWarehouse('esbjerg')}>Esbjerg</button>
+                        <button className={`join-item btn btn-md ${filterWarehouse === 'kolding' ? 'btn-primary' : 'btn-ghost bg-base-100'}`} onClick={() => setFilterWarehouse('kolding')}>Kolding</button>
+                    </div>
+                </div>
+
+                {/* Content Table Area */}
+                <div style={{ width: '100%', display: 'block' }}>
+                    <ProductTable
+                        products={filteredProducts}
+                        onOpenTransfer={(p) => { setSelectedProduct(p); setActiveModal('transfer'); }}
+                        onOpenEdit={(p) => { setSelectedProduct(p); setActiveModal('edit'); }}
+                    />
                 </div>
             </div>
-
-            <ProductTable
-                products={filteredProducts}
-                onOpenTransfer={(p) => { setSelectedProduct(p); setActiveModal('transfer'); }}
-                onOpenEdit={(p) => { setSelectedProduct(p); setActiveModal('edit'); }}
-            />
 
             {activeModal === 'transfer' && selectedProduct && (
                 <TransferModal product={selectedProduct} onClose={() => setActiveModal(null)} onTransfer={transferStock} />
