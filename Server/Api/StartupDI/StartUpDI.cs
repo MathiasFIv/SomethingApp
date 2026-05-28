@@ -6,6 +6,7 @@ using Npgsql;
 using Repository.DbContext;
 using Repository.Repositories;
 using Repository.Repositories.Interfaces;
+using Repository.Services;
 using Service.Auth;
 using Service.Interfaces;
 using Service.Services;
@@ -80,6 +81,9 @@ public static class StartUpDI
             });
         
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<WarehouseService>();
+        services.AddScoped<ItemService>();
+        services.AddScoped<CategoryService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<PasswordService>();
         services.AddScoped<ISieveProcessor, SieveProcessor>();
